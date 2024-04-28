@@ -61,7 +61,9 @@ init_student_array:
         lw $a0, 0($t1)     # Load ID
         lw $a1, 0($t2)     # Load credits
 	la $t6, copy_string_space	# laod space into temp varrible
-
+	
+	        move $a2, $t3  # loads string to arguement
+	
         find_name:		# uses t6 and t7 as temporary values
 		lbu $t7, 0($t3)             # load character to temp
 		sb  $t7, 0($t6)			# load bit to space
@@ -71,7 +73,6 @@ init_student_array:
 		j find_name                    # jump
         end_name_loop:
 
-        la $a2, copy_string_space  # loads string to arguement
 
         move $a3, $s0            # load array
         jal init_student         # call
@@ -92,8 +93,13 @@ init_student_array:
         jr $ra
 
 insert:
-	jr $ra	
+    jr $ra
+
+
 search:
 	jr $ra
+
+
+
 delete:
 	jr $ra
