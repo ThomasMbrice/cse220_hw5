@@ -148,8 +148,66 @@ insert:
         sw $a0, 0($t1)
         jr $ra		# return
 
-search:
-	jr $ra
+search: # $a0 is id, #a1 is table, $a2 is table size
+	move $t0, $a0	# t0 is id
+	move $s0, $a0	# constant
+	move $t1, $a1	# t1 is table array
+	move $t2, $a2	# t2 is table size
+	li $t9, 0
+	li $t7, 0
+	li $t3, 0	# counter = 0
+	li $t4, -1	# negitive 1
+	
+	li $t5,0		# counts how many times has looped
+    	li $t6,2		# forces fail calse
+	
+	div $t0, $t2       # div by size
+    	mfhi $t0           # id is now the index
+	
+	loop:
+	bge $t3,$t2, reset_to_start_search		# this resets it to start
+ 	blt $t3, $t0 moving_to_correct_index_search	#this gets to the correct index of the array and then move the two in lockstep
+ 	beq $t3, $t0 check_my_index_search		# this now goes to the check index section
+ 	
+ 	moving_to_correct_index_search:
+ 		addi $t1, $t1, 4		# INCREMENT ARRAY
+ 		addi $t3,$t3,1			# INCREMENT COUNTER
+ 	j loop				# get back to beggning
+ 	
+ 	check_my_index_search:			#where the magic happens
+ 		lw $t9, 0($t1)			# load addy
+ 		
+ 		beq $t9, $t4, skip	#if tombstone
+ 		beq $t9, $zero,skip	#if emptey
+ 		
+ 		lw $t7, 0($t9)			#its 1am
+ 		srl $t7, $t7, 10		# skim it
+ 		
+ 		beq $a0, $t7 success_condtion_search
+ 		#b success_condtion_search
+ 		skip:
+ 		addi $t1, $t1, 4		# else : INCREMENT ARRAY
+ 		addi $t3,$t3,1			# Ielse : INCREMENT COUNTER
+ 		addi $t0,$t0,1			# else : INCREMENT COUNTER
+ 	j loop
+ 		
+ 	reset_to_start_search:
+ 		addi $t5, $t5, 1		# increment the fial controlla
+ 		beq $t5,$6 fail_condtion_search	# checks how many times it has gone through for fail contion on full array
+ 		li $t0, 0			# resets counter
+ 		li $t3, 0			# reset this thing?
+    		move $t1, $a1			# reset array postion
+ 	j loop
+	
+	fail_condtion_search:
+        move $v0, $zero	# fail 
+        move $v1, $t4
+        jr $ra		#return
+
+    	success_condtion_search:
+    	lw $v0, 0($t1)
+        move $v1, $t0	# winner!!
+        jr $ra		# return
 
 delete:
 	jr $ra
