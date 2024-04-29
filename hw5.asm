@@ -45,6 +45,7 @@ print_student: # a0 has student record
     jr $ra  
         
 init_student_array:
+    lw $s0, 0($sp)	# take out the address of the array
     move $t0, $a0       # $t0 is num students
     move $t1, $a1       # $t1 is id list
     move $t2, $a2       # $t2 is credit list
@@ -93,13 +94,62 @@ init_student_array:
         jr $ra
 
 insert:
-    jr $ra
+    # a0: record a1 = table a2 = table_size
+    
+    move $t1, $a1	# t1 becomes the table 
+    move $t2, $a2	# t2 becomes the tablesize
 
+    # Calculate the array index
+    lw $t8, 0($a0)
+    srl $t8, $t8, 10   # get id
+    div $t8, $t2       # div by size
+    mfhi $t0           # get the index
+    
+    li $t3,0		# counter = 0
+    li $t5,0		# counts how many times has looped
+    li $t6,2		# forces fail calse
+    
+    li $t7,-1		# 5d chess
+    
+
+    big_looopy:
+    	bge $t3,$t2, reset_to_start		# this resets it to start
+ 	blt $t3, $t0 moving_to_correct_index	#this gets to the correct index of the array and then move the two in lockstep
+ 	beq $t3, $t0 check_my_index		# this now goes to the check index section
+ 	
+ 	moving_to_correct_index:
+ 		addi $t1, $t1, 4		# INCREMENT ARRAY
+ 		addi $t3,$t3,1			# INCREMENT COUNTER
+ 	j big_looopy				# get back to beggning
+ 	
+ 	check_my_index:				#where the magic happens
+ 		lw $t9, 0($t1)
+ 		beq $t9, $t7, success_condtion	#if tombstone
+ 		beq $t9, $zero,success_condtion	#if emptey
+ 		addi $t1, $t1, 4		# else : INCREMENT ARRAY
+ 		addi $t3,$t3,1			# Ielse : INCREMENT COUNTER
+ 		addi $t0,$t0,1			# else : INCREMENT COUNTER
+ 	j big_looopy
+ 		
+ 	reset_to_start:
+ 		addi $t5, $t5, 1		# increment the fial controlla
+ 		beq $t5,$6 fail_condtion	# checks how many times it has gone through for fail contion on full array
+ 		li $t0, 0			# resets counter
+ 		li $t3, 0			# reset this thing?
+    		move $t1, $a1			# reset array postion
+ 	j big_looopy
+ 
+    fail_condtion:
+        li $v0, -1	# fail 
+        jr $ra		#return
+
+    success_condtion:
+        move $v0, $t0	# winner!!
+        sw $a0, 0($t1)
+        jr $ra		# return
 
 search:
 	jr $ra
-
-
 
 delete:
 	jr $ra
